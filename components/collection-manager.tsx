@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,6 +47,8 @@ export function CollectionManager() {
   const [totalExpense, setTotalExpense] = useState(20000)
   const [expenseInput, setExpenseInput] = useState("20000")
   const [treatingCount, setTreatingCount] = useState(0) // 奢る人数
+  const [enterPressCount, setEnterPressCount] = useState(0) // Enterキープレスカウント
+  const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const totalCollected = members.filter((m) => m.paid).reduce((sum, m) => sum + m.amount, 0)
   const totalExpected = members.reduce((sum, m) => sum + m.amount, 0)
@@ -141,6 +143,31 @@ export function CollectionManager() {
     const cleaned = value.replace(/[^0-9]/g, "")
     const parsed = cleaned === "" ? 0 : parseInt(cleaned, 10)
     setter(parsed)
+  }
+
+  const handleMemberNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      
+      // 前のタイマーをクリア
+      if (enterTimeoutRef.current) {
+        clearTimeout(enterTimeoutRef.current)
+      }
+
+      // Enterキーが2回押されたかチェック
+      if (enterPressCount === 1) {
+        // 2回目のEnter
+        addMember(false)
+        setEnterPressCount(0)
+      } else {
+        // 1回目のEnter
+        setEnterPressCount(1)
+        // 500ms後にリセット
+        enterTimeoutRef.current = setTimeout(() => {
+          setEnterPressCount(0)
+        }, 500)
+      }
+    }
   }
 
   return (
@@ -313,6 +340,7 @@ export function CollectionManager() {
                 placeholder="名前を入力"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
+                onKeyDown={handleMemberNameKeyDown}
                 className="flex-1 bg-input text-card-foreground placeholder:text-muted-foreground"
               />
               <div className="flex gap-2">
