@@ -13,6 +13,7 @@ interface Member {
   paid: boolean
   isOrganizer: boolean
   isTreating: boolean // 奢る人かどうか
+  treatingAmountPerPerson: number // 1人あたりいくら肩代わりするか
 }
 
 // 数式を安全に評価する関数
@@ -36,11 +37,11 @@ function evaluateExpression(expr: string): number | null {
 
 export function CollectionManager() {
   const [members, setMembers] = useState<Member[]>([
-    { id: "1", name: "田中（幹事）", amount: 4000, paid: true, isOrganizer: true, isTreating: false },
-    { id: "2", name: "佐藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false },
-    { id: "3", name: "鈴木", amount: 4000, paid: false, isOrganizer: false, isTreating: false },
-    { id: "4", name: "高橋", amount: 4000, paid: false, isOrganizer: false, isTreating: false },
-    { id: "5", name: "伊藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false },
+    { id: "1", name: "田中（幹事）", amount: 4000, paid: true, isOrganizer: true, isTreating: false, treatingAmountPerPerson: 0 },
+    { id: "2", name: "佐藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
+    { id: "3", name: "鈴木", amount: 4000, paid: false, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
+    { id: "4", name: "高橋", amount: 4000, paid: false, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
+    { id: "5", name: "伊藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
   ])
   const [newMemberName, setNewMemberName] = useState("")
   const [amountPerPerson, setAmountPerPerson] = useState(4000)
@@ -67,6 +68,7 @@ export function CollectionManager() {
           paid: asOrganizer,
           isOrganizer: asOrganizer,
           isTreating: false,
+          treatingAmountPerPerson: 0,
         },
       ])
       setNewMemberName("")
@@ -81,36 +83,27 @@ export function CollectionManager() {
     setMembers(members.map((m) => (m.id === id ? { ...m, isTreating: !m.isTreating } : m)))
   }
 
-  // 奢る人が負担する追加金額を計算
-  const calculateTreatingAmount = () => {
-    const treatingMembers = members.filter((m) => m.isTreating)
-    const nonTreatingMembers = members.filter((m) => !m.isTreating)
-    
-    if (treatingMembers.length === 0 || nonTreatingMembers.length === 0) return 0
-    
-    // 奢られる人の合計金額を奢る人で割る
-    const treatedTotal = nonTreatingMembers.reduce((sum, m) => sum + m.amount, 0)
-    return Math.ceil(treatedTotal / treatingMembers.length)
+  const updateTreatingAmount = (id: string, amount: number) => {
+    setMembers(members.map((m) => (m.id === id ? { ...m, treatingAmountPerPerson: amount } : m)))
   }
 
+  // 奢りを適用した金額を計算
   const applyTreatingAmounts = () => {
     const treatingMembers = members.filter((m) => m.isTreating)
     const nonTreatingMembers = members.filter((m) => !m.isTreating)
     
     if (treatingMembers.length === 0 || nonTreatingMembers.length === 0) return
     
-    // 奢られる人の合計金額
-    const treatedTotal = nonTreatingMembers.reduce((sum, m) => sum + m.amount, 0)
-    // 奢る人1人あたりの追加負担
-    const additionalPerTreater = Math.ceil(treatedTotal / treatingMembers.length)
+    // 各奢られる人が受ける割引の合計（全奢り人の肩代わり額の合計）
+    const totalDiscountPerPerson = treatingMembers.reduce((sum, m) => sum + m.treatingAmountPerPerson, 0)
     
     setMembers(members.map((m) => {
       if (m.isTreating) {
-        // 奢る人: 自分の分 + 奢る分
-        return { ...m, amount: amountPerPerson + additionalPerTreater }
+        // 奢る人: 基本金額 + (自分の肩代わり額 × 奢られる人数)
+        return { ...m, amount: amountPerPerson + (m.treatingAmountPerPerson * nonTreatingMembers.length) }
       } else {
-        // 奢られる人: 0円
-        return { ...m, amount: 0 }
+        // 奢られる人: 基本金額 - 全奢り人の肩代わり額合計
+        return { ...m, amount: Math.max(0, amountPerPerson - totalDiscountPerPerson) }
       }
     }))
   }
@@ -279,23 +272,52 @@ export function CollectionManager() {
             {/* 奢り設定 */}
             {members.some((m) => m.isTreating) && (
               <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="flex items-center gap-2 font-medium text-accent">
-                      <Gift className="h-4 w-4" />
-                      奢り設定
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      奢る人: {members.filter((m) => m.isTreating).map((m) => m.name).join("、")}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      奢る人1人あたりの追加負担: ¥{calculateTreatingAmount().toLocaleString()}
-                    </p>
+                <div className="space-y-4">
+                  <p className="flex items-center gap-2 font-medium text-accent">
+                    <Gift className="h-4 w-4" />
+                    奢り設定
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    奢る人ごとに「1人あたりいくら肩代わりするか」を設定してください
+                  </p>
+                  <div className="space-y-2">
+                    {members.filter((m) => m.isTreating).map((member) => {
+                      const nonTreatingCount = members.filter((m) => !m.isTreating).length
+                      const totalForThisTreater = member.treatingAmountPerPerson * nonTreatingCount
+                      return (
+                        <div key={member.id} className="flex flex-col gap-2 rounded-md bg-background/50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-card-foreground">{member.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              ({nonTreatingCount}人 × ¥{member.treatingAmountPerPerson.toLocaleString()} = ¥{totalForThisTreater.toLocaleString()} 追加負担)
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">1人あたり</span>
+                            <span className="text-muted-foreground">¥</span>
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              value={member.treatingAmountPerPerson === 0 ? "" : member.treatingAmountPerPerson.toLocaleString()}
+                              onChange={(e) => handleAmountChange(e.target.value, (amount) => updateTreatingAmount(member.id, amount))}
+                              className="w-24 bg-input text-right text-card-foreground"
+                              placeholder="500"
+                            />
+                            <span className="text-sm text-muted-foreground">肩代わり</span>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                  <Button onClick={applyTreatingAmounts} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Gift className="mr-2 h-4 w-4" />
-                    金額を自動計算
-                  </Button>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      奢られる人の支払額: ¥{Math.max(0, amountPerPerson - members.filter((m) => m.isTreating).reduce((sum, m) => sum + m.treatingAmountPerPerson, 0)).toLocaleString()}
+                    </p>
+                    <Button onClick={applyTreatingAmounts} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                      <Gift className="mr-2 h-4 w-4" />
+                      金額を自動計算
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
