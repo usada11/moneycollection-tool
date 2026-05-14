@@ -8,7 +8,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: '集金マネージャー | 飲み会幹事向け集金管理ツール',
-  description: '飲み会の幹事がメンバーからの集金を簡単に管理できるツール',
+  description: '飲み会幹事がメンバーからの集金を簡単に管理できるツール',
   generator: 'v0.app',
   icons: {
     icon: [
