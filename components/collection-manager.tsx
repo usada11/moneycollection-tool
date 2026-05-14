@@ -62,6 +62,12 @@ export function CollectionManager() {
     setMembers(members.map((m) => ({ ...m, amount: amountPerPerson })))
   }
 
+  const handleAmountChange = (value: string, setter: (amount: number) => void) => {
+    const cleaned = value.replace(/[^0-9]/g, "")
+    const parsed = cleaned === "" ? 0 : parseInt(cleaned, 10)
+    setter(parsed)
+  }
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
@@ -139,9 +145,10 @@ export function CollectionManager() {
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">¥</span>
                   <Input
-                    type="number"
-                    value={amountPerPerson}
-                    onChange={(e) => setAmountPerPerson(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={amountPerPerson === 0 ? "" : amountPerPerson.toLocaleString()}
+                    onChange={(e) => handleAmountChange(e.target.value, setAmountPerPerson)}
                     className="bg-input text-card-foreground"
                   />
                 </div>
@@ -156,9 +163,10 @@ export function CollectionManager() {
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">¥</span>
                   <Input
-                    type="number"
-                    value={totalExpense}
-                    onChange={(e) => setTotalExpense(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={totalExpense === 0 ? "" : totalExpense.toLocaleString()}
+                    onChange={(e) => handleAmountChange(e.target.value, setTotalExpense)}
                     className="bg-input text-card-foreground"
                   />
                 </div>
@@ -253,9 +261,10 @@ export function CollectionManager() {
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">¥</span>
                       <Input
-                        type="number"
-                        value={member.amount}
-                        onChange={(e) => updateMemberAmount(member.id, Number(e.target.value))}
+                        type="text"
+                        inputMode="numeric"
+                        value={member.amount === 0 ? "" : member.amount.toLocaleString()}
+                        onChange={(e) => handleAmountChange(e.target.value, (amount) => updateMemberAmount(member.id, amount))}
                         className="w-24 bg-input text-right text-card-foreground"
                       />
                     </div>
