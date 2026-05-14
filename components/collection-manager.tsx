@@ -4,26 +4,48 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Check, X, Plus, Trash2, Users, Wallet, Receipt, AlertCircle } from "lucide-react"
+import { Check, X, Plus, Trash2, Users, Wallet, Receipt, AlertCircle, Crown } from "lucide-react"
 
 interface Member {
   id: string
   name: string
   amount: number
   paid: boolean
+  isOrganizer: boolean
 }
+
+// 数式を安全に評価する関数
+function evaluateExpression(expr: string): number | null {
+  const cleaned = expr.replace(/[^0-9+\-*/().]/g, "")
+  if (!cleaned) return null
+  try {
+    // 安全な評価: 数字と演算子のみ許可
+    if (!/^[\d+\-*/().\s]+$/.test(cleaned)) return null
+    const result = Function(`"use strict"; return (${cleaned})`)()
+    if (typeof result === "number" && isFinite(result)) {
+      return Math.round(result)
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+
 
 export function CollectionManager() {
   const [members, setMembers] = useState<Member[]>([
-    { id: "1", name: "田中", amount: 4000, paid: true },
-    { id: "2", name: "佐藤", amount: 4000, paid: true },
-    { id: "3", name: "鈴木", amount: 4000, paid: false },
-    { id: "4", name: "高橋", amount: 4000, paid: false },
-    { id: "5", name: "伊藤", amount: 4000, paid: true },
+    { id: "1", name: "田中（幹事）", amount: 4000, paid: true, isOrganizer: true },
+    { id: "2", name: "佐藤", amount: 4000, paid: true, isOrganizer: false },
+    { id: "3", name: "鈴木", amount: 4000, paid: false, isOrganizer: false },
+    { id: "4", name: "高橋", amount: 4000, paid: false, isOrganizer: false },
+    { id: "5", name: "伊藤", amount: 4000, paid: true, isOrganizer: false },
   ])
   const [newMemberName, setNewMemberName] = useState("")
   const [amountPerPerson, setAmountPerPerson] = useState(4000)
   const [totalExpense, setTotalExpense] = useState(20000)
+  const [expenseInput, setExpenseInput] = useState("20000")
+  const [includeOrganizer, setIncludeOrganizer] = useState(true)
 
   const totalCollected = members.filter((m) => m.paid).reduce((sum, m) => sum + m.amount, 0)
   const totalExpected = members.reduce((sum, m) => sum + m.amount, 0)
@@ -31,7 +53,7 @@ export function CollectionManager() {
   const unpaidAmount = unpaidMembers.reduce((sum, m) => sum + m.amount, 0)
   const difference = totalCollected - totalExpense
 
-  const addMember = () => {
+  const addMember = (asOrganizer = false) => {
     if (newMemberName.trim()) {
       setMembers([
         ...members,
@@ -39,10 +61,23 @@ export function CollectionManager() {
           id: Date.now().toString(),
           name: newMemberName.trim(),
           amount: amountPerPerson,
-          paid: false,
+          paid: asOrganizer,
+          isOrganizer: asOrganizer,
         },
       ])
       setNewMemberName("")
+    }
+  }
+
+  const toggleOrganizer = (id: string) => {
+    setMembers(members.map((m) => (m.id === id ? { ...m, isOrganizer: !m.isOrganizer } : m)))
+  }
+
+  const handleExpenseInput = (value: string) => {
+    setExpenseInput(value)
+    const result = evaluateExpression(value)
+    if (result !== null) {
+      setTotalExpense(result)
     }
   }
 
@@ -160,15 +195,16 @@ export function CollectionManager() {
             <div className="flex flex-col gap-4 md:flex-row md:items-end">
               <div className="flex-1 space-y-2">
                 <label className="text-sm font-medium text-card-foreground">飲み会の総額</label>
+                <p className="text-xs text-muted-foreground">数式OK（例: 3500*20）</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">¥</span>
                   <Input
                     type="text"
-                    inputMode="numeric"
-                    value={totalExpense === 0 ? "" : totalExpense.toLocaleString()}
-                    onChange={(e) => handleAmountChange(e.target.value, setTotalExpense)}
+                    value={expenseInput}
+                    onChange={(e) => handleExpenseInput(e.target.value)}
+                    placeholder="3500*20"
                     className="bg-input text-card-foreground"
                   />
+                  <span className="whitespace-nowrap text-muted-foreground">= ¥{totalExpense.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -205,18 +241,24 @@ export function CollectionManager() {
             <CardTitle className="text-card-foreground">メンバー追加</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Input
                 placeholder="名前を入力"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addMember()}
-                className="bg-input text-card-foreground placeholder:text-muted-foreground"
+                onKeyDown={(e) => e.key === "Enter" && addMember(false)}
+                className="flex-1 bg-input text-card-foreground placeholder:text-muted-foreground"
               />
-              <Button onClick={addMember} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Plus className="mr-2 h-4 w-4" />
-                追加
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => addMember(false)} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 sm:flex-none">
+                  <Plus className="mr-2 h-4 w-4" />
+                  追加
+                </Button>
+                <Button onClick={() => addMember(true)} variant="outline" className="flex-1 border-accent text-accent hover:bg-accent hover:text-accent-foreground sm:flex-none">
+                  <Crown className="mr-2 h-4 w-4" />
+                  幹事として追加
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -249,9 +291,17 @@ export function CollectionManager() {
                       {member.paid ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                     </button>
                     <div>
-                      <p className={`font-medium ${member.paid ? "text-success" : "text-card-foreground"}`}>
-                        {member.name}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={`font-medium ${member.paid ? "text-success" : "text-card-foreground"}`}>
+                          {member.name}
+                        </p>
+                        {member.isOrganizer && (
+                          <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">
+                            <Crown className="h-3 w-3" />
+                            幹事
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {member.paid ? "支払済み" : "未払い"}
                       </p>
@@ -268,6 +318,15 @@ export function CollectionManager() {
                         className="w-24 bg-input text-right text-card-foreground"
                       />
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleOrganizer(member.id)}
+                      className={member.isOrganizer ? "text-accent" : "text-muted-foreground hover:text-accent"}
+                      title={member.isOrganizer ? "幹事を解除" : "幹事に設定"}
+                    >
+                      <Crown className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
