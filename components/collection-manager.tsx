@@ -344,11 +344,11 @@ export function CollectionManager() {
                 className="flex-1 bg-input text-card-foreground placeholder:text-muted-foreground"
               />
               <div className="flex gap-2">
-                <Button onDoubleClick={() => addMember(false)} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 sm:flex-none">
+                <Button onClick={() => addMember(false)} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 sm:flex-none">
                   <Plus className="mr-2 h-4 w-4" />
                   追加
                 </Button>
-                <Button onDoubleClick={() => addMember(true)} variant="outline" className="flex-1 border-accent text-accent hover:bg-accent hover:text-accent-foreground sm:flex-none">
+                <Button onClick={() => addMember(true)} variant="outline" className="flex-1 border-accent text-accent hover:bg-accent hover:text-accent-foreground sm:flex-none">
                   <Crown className="mr-2 h-4 w-4" />
                   幹事として追加
                 </Button>
