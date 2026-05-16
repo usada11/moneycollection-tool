@@ -42,7 +42,7 @@ export function CollectionManager() {
   const [newMemberName, setNewMemberName] = useState("")
   const [amountPerPerson, setAmountPerPerson] = useState(0)
   const [totalExpense, setTotalExpense] = useState(0)
-  const [expenseInput, setExpenseInput] = useState("0")
+  const [expenseInput, setExpenseInput] = useState("")
   const [treatingCount, setTreatingCount] = useState(0) // 奢る人数
   const [enterPressCount, setEnterPressCount] = useState(0) // Enterキープレスカウント
   const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -72,7 +72,15 @@ export function CollectionManager() {
   }
 
   const toggleOrganizer = (id: string) => {
-    setMembers(members.map((m) => (m.id === id ? { ...m, isOrganizer: !m.isOrganizer } : m)))
+    setMembers(members.map((m) =>
+      m.id === id
+        ? {
+            ...m,
+            isOrganizer: !m.isOrganizer,
+            paid: !m.isOrganizer ? true : m.paid,
+          }
+        : m,
+    ))
   }
 
   const toggleTreating = (id: string) => {
