@@ -1,24 +1,30 @@
 # moneycollection-tool
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+集金・支払い管理を簡単に行うためのWebアプリです。
 
-## Built with v0
+## Features
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+- 支払い状況の管理
+- メンバー一覧表示
+- 未払い確認
+- 合計金額計算
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_8gs3APqgklAS85mEGnsDI1krYabe)
+## Tech Stack
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- v0
+- Vercel
 
 ## Getting Started
 
 First, run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

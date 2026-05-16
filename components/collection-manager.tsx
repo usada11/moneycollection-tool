@@ -37,16 +37,12 @@ function evaluateExpression(expr: string): number | null {
 
 export function CollectionManager() {
   const [members, setMembers] = useState<Member[]>([
-    { id: "1", name: "田中（幹事）", amount: 4000, paid: true, isOrganizer: true, isTreating: false, treatingAmountPerPerson: 0 },
-    { id: "2", name: "佐藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
-    { id: "3", name: "鈴木", amount: 4000, paid: false, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
-    { id: "4", name: "高橋", amount: 4000, paid: false, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
-    { id: "5", name: "伊藤", amount: 4000, paid: true, isOrganizer: false, isTreating: false, treatingAmountPerPerson: 0 },
+    // { id: "1", name: "A氏（幹事）", amount: 4000, paid: true, isOrganizer: true, isTreating: false, treatingAmountPerPerson: 0 },
   ])
   const [newMemberName, setNewMemberName] = useState("")
-  const [amountPerPerson, setAmountPerPerson] = useState(4000)
-  const [totalExpense, setTotalExpense] = useState(20000)
-  const [expenseInput, setExpenseInput] = useState("20000")
+  const [amountPerPerson, setAmountPerPerson] = useState(0)
+  const [totalExpense, setTotalExpense] = useState(0)
+  const [expenseInput, setExpenseInput] = useState("0")
   const [treatingCount, setTreatingCount] = useState(0) // 奢る人数
   const [enterPressCount, setEnterPressCount] = useState(0) // Enterキープレスカウント
   const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null)
