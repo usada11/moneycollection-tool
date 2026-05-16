@@ -1,25 +1,23 @@
-# moneycollection-tool
+# Money Collection Tool
 
-集金・支払い管理を簡単に行うためのWebアプリです。
+集金管理・支払い確認を簡単に行うためのWebアプリ
 
 ## Features
 
-- 支払い状況の管理
-- メンバー一覧表示
-- 未払い確認
-- 合計金額計算
+- 支払い状況の確認
+- メンバー管理
+- 集金状況の可視化
+- 未払いチェック
 
 ## Tech Stack
 
-- Next.js
+- Next.js 16
+- React 19
 - TypeScript
 - Tailwind CSS
-- v0
 - Vercel
 
-## Getting Started
-
-First, run the development server:
+## Development
 
 ```bash
 npm install
