@@ -165,6 +165,10 @@ export function CollectionManager() {
     setMembers(members.map((m) => (m.id === id ? { ...m, amount } : m)))
   }
 
+  const updateMemberName = (id: string, name: string) => {
+    setMembers(members.map((m) => (m.id === id ? { ...m, name } : m)))
+  }
+
   const applyAmountToAll = () => {
     setMembers(members.map((m) => ({ ...m, amount: amountPerPerson })))
   }
@@ -467,10 +471,14 @@ export function CollectionManager() {
                       {member.paid ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                     </button>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <p className={`font-medium ${member.paid ? "text-success" : "text-card-foreground"}`}>
-                          {member.name}
-                        </p>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Input
+                          type="text"
+                          value={member.name}
+                          onChange={(e) => updateMemberName(member.id, e.target.value)}
+                          onBlur={() => saveName(member.name)}
+                          className={`max-w-[160px] bg-input text-card-foreground ${member.paid ? "text-success" : "text-card-foreground"}`}
+                        />
                         {member.isOrganizer && (
                           <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">
                             <Crown className="h-3 w-3" />
