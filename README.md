@@ -39,8 +39,11 @@ https://v0-moneycollection-tool.vercel.app/
 
 # Contributing
 Fork を作成して feature ブランチを切る
+
 変更をコミットして Pull Request を開く
+
 可能であればテスト・lint を追加する
+
 詳細な貢献ルールは CONTRIBUTING.md を用意
 
 # Notes
