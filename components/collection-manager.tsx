@@ -453,16 +453,16 @@ export function CollectionManager() {
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className={`flex items-center justify-between rounded-lg border p-4 transition-colors ${
+                  className={`flex flex-col gap-3 rounded-lg border p-4 transition-colors ${
                     member.paid
                       ? "border-success/30 bg-success/10"
                       : "border-border bg-secondary"
-                  }`}
+                  } sm:flex-row sm:items-center sm:justify-between`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <button
                       onClick={() => togglePaid(member.id)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                      className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${
                         member.paid
                           ? "bg-success text-success-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -470,7 +470,7 @@ export function CollectionManager() {
                     >
                       {member.paid ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
                     </button>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <Input
                           type="text"
@@ -497,7 +497,7 @@ export function CollectionManager() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-end gap-3">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">¥</span>
                       <Input
