@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,9 +43,39 @@ export function CollectionManager() {
   const [amountPerPerson, setAmountPerPerson] = useState(0)
   const [totalExpense, setTotalExpense] = useState(0)
   const [expenseInput, setExpenseInput] = useState("")
+  const [savedNames, setSavedNames] = useState<string[]>([])
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [treatingCount, setTreatingCount] = useState(0) // 奢る人数
   const [enterPressCount, setEnterPressCount] = useState(0) // Enterキープレスカウント
   const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const LOCAL_STORAGE_KEY = "savedNames"
+
+  const getNames = () => {
+    if (typeof window === "undefined") return []
+    return JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) || "[]") as string[]
+  }
+
+  const saveName = (name: string) => {
+    const normalized = name.trim()
+    if (!normalized) return
+    const current = getNames()
+    if (!current.includes(normalized)) {
+      const next = [...current, normalized]
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next))
+      setSavedNames(next)
+    }
+  }
+
+  const suggest = (query: string) => {
+    if (!query.trim()) return []
+    return savedNames.filter((n) => n.toLowerCase().includes(query.toLowerCase()))
+  }
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    setSavedNames(getNames())
+  }, [])
 
   const totalCollected = members.filter((m) => m.paid).reduce((sum, m) => sum + m.amount, 0)
   const totalExpected = members.reduce((sum, m) => sum + m.amount, 0)
@@ -54,12 +84,13 @@ export function CollectionManager() {
   const difference = totalCollected - totalExpense
 
   const addMember = (asOrganizer = false) => {
-    if (newMemberName.trim()) {
+    const normalized = newMemberName.trim()
+    if (normalized) {
       setMembers([
         ...members,
         {
           id: Date.now().toString(),
-          name: newMemberName.trim(),
+          name: normalized,
           amount: amountPerPerson,
           paid: asOrganizer,
           isOrganizer: asOrganizer,
@@ -67,7 +98,9 @@ export function CollectionManager() {
           treatingAmountPerPerson: 0,
         },
       ])
+      saveName(normalized)
       setNewMemberName("")
+      setSuggestions([])
     }
   }
 
@@ -362,13 +395,36 @@ export function CollectionManager() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Input
-                placeholder="名前を入力"
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
-                onKeyDown={handleMemberNameKeyDown}
-                className="flex-1 bg-input text-card-foreground placeholder:text-muted-foreground"
-              />
+              <div className="relative flex-1">
+                <Input
+                  placeholder="名前を入力"
+                  value={newMemberName}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setNewMemberName(value)
+                    setSuggestions(suggest(value))
+                  }}
+                  onKeyDown={handleMemberNameKeyDown}
+                  className="w-full bg-input text-card-foreground placeholder:text-muted-foreground"
+                />
+                {suggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full z-10 mt-1 space-y-1 rounded-lg border border-border bg-card p-2 shadow-lg">
+                    {suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => {
+                          setNewMemberName(suggestion)
+                          setSuggestions([])
+                        }}
+                        className="w-full rounded-md px-3 py-2 text-left text-sm text-card-foreground hover:bg-secondary"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button onClick={() => addMember(false)} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 sm:flex-none">
                   <Plus className="mr-2 h-4 w-4" />
