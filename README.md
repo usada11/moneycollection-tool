@@ -1,39 +1,51 @@
 # Money Collection Tool
+集金管理・支払い確認を簡単に行うための Web アプリ。
 
-集金管理・支払い確認を簡単に行うためのWebアプリ
-
-## Features
-
+# Features
 - 支払い状況の確認
 - メンバー管理
 - 集金状況の可視化
 - 未払いチェック
-
-## Tech Stack
-
+# Tech Stack
 - Next.js 16
 - React 19
 - TypeScript
 - Tailwind CSS
 - Vercel
+# Requirements
+- Node.js 18+
+- npm
+# Installation
+bash
 
-## Development
 
-```bash
-> npm install
+> git clone https://github.com/usada11/moneycollection-tool.git
+> cd moneycollection-tool
+> npm ci
+# Development
+
 > npm run dev
+ブラウザで http://localhost:3000 を開いてください．
+編集は app/page.tsx などを変更すると自動で反映されます．
+
+# Build / Production
+
+> npm run build
+> npm run start
 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Demo
+https://v0-moneycollection-tool.vercel.app/
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Contributing
+Fork を作成して feature ブランチを切る
+変更をコミットして Pull Request を開く
+可能であればテスト・lint を追加する
+詳細な貢献ルールは CONTRIBUTING.md を用意
 
-## Learn More
+# Notes
+商用利用や改変については LICENSE（MIT）を参照
 
-To learn more, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
-
-<a href="https://v0.app/chat/api/kiro/clone/usada11/moneycollection-tool" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+# Learn More
+Next.js ドキュメント: https://nextjs.org/docs
+Next.js チュートリアル: https://nextjs.org/learn
