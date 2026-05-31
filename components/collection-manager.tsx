@@ -477,7 +477,7 @@ export function CollectionManager() {
                           value={member.name}
                           onChange={(e) => updateMemberName(member.id, e.target.value)}
                           onBlur={() => saveName(member.name)}
-                          className={`max-w-[160px] bg-input text-card-foreground ${member.paid ? "text-success" : "text-card-foreground"}`}
+                          className={`w-full min-w-[140px] max-w-[280px] bg-input text-card-foreground ${member.paid ? "text-success" : "text-card-foreground"}`}
                         />
                         {member.isOrganizer && (
                           <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">
